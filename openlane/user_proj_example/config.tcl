@@ -20,29 +20,49 @@ set script_dir [file dirname [file normalize [info script]]]
 
 set ::env(DESIGN_NAME) user_proj_example
 
+#########################################################################
 set ::env(VERILOG_FILES) "\
-	$::env(CARAVEL_ROOT)/verilog/rtl/defines.v \
-	$script_dir/../../verilog/rtl/user_proj_example.v"
+        $::env(CARAVEL_ROOT)/verilog/rtl/defines.v \
+        $script_dir/../../verilog/rtl/user_proj_example.v"
 
-set ::env(DESIGN_IS_CORE) 0
+set ::env(EXTRA_LEFS) [glob $::env(CARAVEL_ROOT)/../lef/*.lef]
+set ::env(EXTRA_GDS_FILES) [glob $::env(CARAVEL_ROOT)/../gds/*.gds]
+set ::env(MACRO_PLACEMENT_CFG) $::env(CARAVEL_ROOT)/../openlane/user_proj_example/macro_placement.cfg
+##########################################################################
+
+set ::env(DESIGN_IS_CORE) 1
+set ::env(FP_PDN_CORE_RING) 1
+set ::env(FP_PDN_ENABLE_MACROS_GRID) 1
+#set ::env(SYNTH_MAX_FANOUT) "50"
+
+#set ::env(PL_MACRO_CHANNEL) {0 0}
+#set ::env(PL_MACRO_HALO) {0 0}
+
+
+
+
+
 
 set ::env(CLOCK_PORT) "wb_clk_i"
-set ::env(CLOCK_NET) "counter.clk"
-set ::env(CLOCK_PERIOD) "10"
+set ::env(CLOCK_PERIOD) "15"
+#set ::env(CLOCK_NET) "counter.clk"
+
+#set ::env(FP_CORE_UTIL) 32
+set ::env(PL_TARGET_DENSITY) 0.30
 
 set ::env(FP_SIZING) absolute
-set ::env(DIE_AREA) "0 0 900 600"
+set ::env(DIE_AREA) "0 0 512 600"
 
 set ::env(FP_PIN_ORDER_CFG) $script_dir/pin_order.cfg
 
 set ::env(PL_BASIC_PLACEMENT) 0
-set ::env(PL_TARGET_DENSITY) 0.05
 
 # Maximum layer used for routing is metal 4.
 # This is because this macro will be inserted in a top level (user_project_wrapper) 
 # where the PDN is planned on metal 5. So, to avoid having shorts between routes
 # in this macro and the top level metal 5 stripes, we have to restrict routes to metal4.  
 # 
+
 set ::env(RT_MAX_LAYER) {met4}
 
 # You can draw more power domains if you need to 
