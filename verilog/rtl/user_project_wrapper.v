@@ -111,7 +111,6 @@ module user_project_wrapper #(
 	    .SUM_FINAL(la_data_out[47:32]),
 	    .COUT_FINAL(la_data_out[48]),
 	    .CLK(wb_clk_i));
-
     sa_2D sa2d_0( 
 	
 //		`ifdef USE_POWER_PINS
@@ -124,7 +123,6 @@ module user_project_wrapper #(
 	    .SHIFTEN(la_oenb[5:4]),
 	    .RST(wb_rst_i), 
 	    .Y(la_data_out[80:49]));
-
    r8_mb8 r8_mb8_0(
    
 //		`ifdef USE_POWER_PINS
@@ -135,7 +133,7 @@ module user_project_wrapper #(
 	    .my(la_data_in[127:120]),
 	    .CLK(wb_clk_i), 
 	    .RST(wb_rst_i),
-	    .product_final(la_data_out[106:81]));
+	    .product_final(la_data_out[96:81]));
 
 
 

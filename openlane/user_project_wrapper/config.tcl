@@ -31,10 +31,6 @@ set script_dir [file dirname [file normalize [info script]]]
 set ::env(DESIGN_NAME) user_project_wrapper
 #section end
 
-set ::env(VDD_NETS) [list {vccd1}]
-set ::env(GND_NETS) [list {vssd1}]
-
-
 # User Configurations
 
 ## Source Verilog Files
@@ -42,33 +38,43 @@ set ::env(VERILOG_FILES) "\
 	$::env(CARAVEL_ROOT)/verilog/rtl/defines.v \
 	$script_dir/../../verilog/rtl/user_project_wrapper.v"
 
+
+
 ## Clock configurations
-set ::env(CLOCK_PORT) "user_clock2"
-set ::env(CLOCK_NET) "mprj.clk"
+set ::env(CLOCK_PORT) "clk_50"
+set ::env(CLOCK_PORT) "wb_clk_i"
+#set ::env(CLOCK_NET) "mprj.clk"
 
 set ::env(CLOCK_PERIOD) "10"
 
 ## Internal Macros
 ### Macro PDN Connections
 set ::env(FP_PDN_MACRO_HOOKS) "\
-	mprj vccd1 vssd1 vccd1 vssd1"
-
+	sa_2d_0 vccd1 vssd1 vccd1 vssd1, \
+	ffpmac_0 vccd1 vssd1 vccd1 vssd1, \
+	r8_mb8_0 vccd1 vssd1 vccd1 vssd1, \
+	cla16_0 vccd1 vssd1 vccd1 vssd1"
 ### Macro Placement
 set ::env(MACRO_PLACEMENT_CFG) $script_dir/macro.cfg
 
 ### Black-box verilog and views
 set ::env(VERILOG_FILES_BLACKBOX) "\
 	$::env(CARAVEL_ROOT)/verilog/rtl/defines.v \
-	$script_dir/../../verilog/rtl/user_proj_example.v"
+	$script_dir/../../verilog/rtl/b_box/*.v"
 
-set ::env(EXTRA_LEFS) "\
-	$script_dir/../../lef/user_proj_example.lef"
+set ::env(EXTRA_LEFS) [glob $::env(CARAVEL_ROOT)/../lef/b_box/*.lef]
+set ::env(EXTRA_GDS_FILES) [glob $::env(CARAVEL_ROOT)/../gds/b_box/*.gds]
 
-set ::env(EXTRA_GDS_FILES) "\
-	$script_dir/../../gds/user_proj_example.gds"
-
-#set ::env(GLB_RT_MAXLAYER) 5
 set ::env(RT_MAX_LAYER) {met4}
+
+
+# save some time
+set ::env(RUN_KLAYOUT_XOR) 0
+set ::env(RUN_KLAYOUT_DRC) 0
+
+# save some more time while debugging
+set ::env(MAGIC_DRC_USE_GDS) 0
+set ::env(RUN_MAGIC_DRC) 0
 
 
 
@@ -79,6 +85,8 @@ set ::env(FP_PDN_CHECK_NODES) 0
 # The following is because there are no std cells in the example wrapper project.
 set ::env(SYNTH_TOP_LEVEL) 1
 set ::env(PL_RANDOM_GLB_PLACEMENT) 1
+
+
 
 set ::env(PL_RESIZER_DESIGN_OPTIMIZATIONS) 0
 set ::env(PL_RESIZER_TIMING_OPTIMIZATIONS) 0
