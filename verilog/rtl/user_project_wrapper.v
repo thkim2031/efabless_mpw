@@ -72,7 +72,7 @@ module user_project_wrapper #(
     inout [`MPRJ_IO_PADS-10:0] analog_io,
 
     // Independent clock (on independent integer divider)
-    input   clk_50,
+    input   user_clock2,
 
     // User maskable interrupt signals
     output [2:0] user_irq
@@ -96,7 +96,7 @@ module user_project_wrapper #(
 	    .B(la_data_in[31:16]), 
 	    .C(la_data_in[63:32]),
 	    .rnd(la_oenb[1:0]),
-	    .clk(clk_50),
+	    .clk(user_clock2),
 	    .rst(wb_rst_i),
 	    .result(la_data_out[31:0]));
 

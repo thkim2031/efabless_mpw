@@ -41,7 +41,7 @@ set ::env(VERILOG_FILES) "\
 
 
 ## Clock configurations
-set ::env(CLOCK_PORT) "clk_50"
+set ::env(CLOCK_PORT) "user_clock2"
 set ::env(CLOCK_PORT) "wb_clk_i"
 #set ::env(CLOCK_NET) "mprj.clk"
 

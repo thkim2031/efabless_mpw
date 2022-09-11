@@ -1,233 +1,303 @@
-// SPDX-FileCopyrightText: 2020 Efabless Corporation
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// SPDX-License-Identifier: Apache-2.0
-
-`default_nettype none
-/*
- *-------------------------------------------------------------
- *
- * user_project_wrapper
- *
- * This wrapper enumerates all of the pins available to the
- * user for the user project.
- *
- * An example user project is provided in this wrapper.  The
- * example should be removed and replaced with the actual
- * user project.
- *
- *-------------------------------------------------------------
- */
-
-module user_project_wrapper #(
-    parameter BITS = 32
-) (
-`ifdef USE_POWER_PINS
-    inout vdda1,	// User area 1 3.3V supply
-    inout vdda2,	// User area 2 3.3V supply
-    inout vssa1,	// User area 1 analog ground
-    inout vssa2,	// User area 2 analog ground
-    inout vccd1,	// User area 1 1.8V supply
-    inout vccd2,	// User area 2 1.8v supply
-    inout vssd1,	// User area 1 digital ground
-    inout vssd2,	// User area 2 digital ground
-`endif
-
-    // Wishbone Slave ports (WB MI A)
-    input wb_clk_i,
-    input wb_rst_i,
-    input wbs_stb_i,
-    input wbs_cyc_i,
-    input wbs_we_i,
-    input [3:0] wbs_sel_i,
-    input [31:0] wbs_dat_i,
-    input [31:0] wbs_adr_i,
-    output wbs_ack_o,
-    output [31:0] wbs_dat_o,
-
-    // Logic Analyzer Signals
-    input  [127:0] la_data_in,
-    output [127:0] la_data_out,
-    input  [127:0] la_oenb,
-
-    // IOs
-    input  [`MPRJ_IO_PADS-1:0] io_in,
-    output [`MPRJ_IO_PADS-1:0] io_out,
-    output [`MPRJ_IO_PADS-1:0] io_oeb,
-
-    // Analog (direct connection to GPIO pad---use with caution)
-    // Note that analog I/O is not available on the 7 lowest-numbered
-    // GPIO pads, and so the analog_io indexing is offset from the
-    // GPIO indexing by 7 (also upper 2 GPIOs do not have analog_io).
-    inout [`MPRJ_IO_PADS-10:0] analog_io,
-
-    // Independent clock (on independent integer divider)
-    input   clk_50,
-
-    // User maskable interrupt signals
-    output [2:0] user_irq
-);
-
-/*--------------------------------------*/
-/* User project is instantiated  here   */
-/*--------------------------------------*/
+module user_project_wrapper (user_clock2,
+    vccd1,
+    vccd2,
+    vdda1,
+    vdda2,
+    vssa1,
+    vssa2,
+    vssd1,
+    vssd2,
+    wb_clk_i,
+    wb_rst_i,
+    wbs_ack_o,
+    wbs_cyc_i,
+    wbs_stb_i,
+    wbs_we_i,
+    analog_io,
+    io_in,
+    io_oeb,
+    io_out,
+    la_data_in,
+    la_data_out,
+    la_oenb,
+    user_irq,
+    wbs_adr_i,
+    wbs_dat_i,
+    wbs_dat_o,
+    wbs_sel_i);
+ input user_clock2;
+ input vccd1;
+ input vccd2;
+ input vdda1;
+ input vdda2;
+ input vssa1;
+ input vssa2;
+ input vssd1;
+ input vssd2;
+ input wb_clk_i;
+ input wb_rst_i;
+ output wbs_ack_o;
+ input wbs_cyc_i;
+ input wbs_stb_i;
+ input wbs_we_i;
+ inout [28:0] analog_io;
+ input [37:0] io_in;
+ output [37:0] io_oeb;
+ output [37:0] io_out;
+ input [127:0] la_data_in;
+ output [127:0] la_data_out;
+ input [127:0] la_oenb;
+ output [2:0] user_irq;
+ input [31:0] wbs_adr_i;
+ input [31:0] wbs_dat_i;
+ output [31:0] wbs_dat_o;
+ input [3:0] wbs_sel_i;
 
 
-
-
-
-    FFPMAC ffpmac_0(
-	
-//		`ifdef USE_POWER_PINS
-//		.vccd1(vccd1),	// User area 1 1.8V power
-//		.vssd1(vssd1),	// User area 1 digital ground
-//		`endif
-	    .A(la_data_in[15:0]),
-	    .B(la_data_in[31:16]), 
-	    .C(la_data_in[63:32]),
-	    .rnd(la_oenb[1:0]),
-	    .clk(clk_50),
-	    .rst(wb_rst_i),
-	    .result(la_data_out[31:0]));
-
-    CLA_16 cla16_0( 
-//		`ifdef USE_POWER_PINS
-//		.vccd1(vccd1),	// User area 1 1.8V power
-//		.vssd1(vssd1),	// User area 1 digital ground
-//		`endif
-	    .OPA(la_data_in[79:64]),
-	    .OPB(la_data_in[95:80]),
-	    .CIN(la_oenb[2]), .PHI(la_oenb[3]),
-	    .SUM_FINAL(la_data_out[47:32]),
-	    .COUT_FINAL(la_data_out[48]),
-	    .CLK(wb_clk_i));
-    sa_2D sa2d_0( 
-	
-//		`ifdef USE_POWER_PINS
-//		.vccd1(vccd1),	// User area 1 1.8V power
-//		.vssd1(vssd1),	// User area 1 digital ground
-//		`endif
-	    .AA(la_data_in[103:96]), 
-	    .BB(la_data_in[111:104]), 
-	    .CLK(wb_clk_i), 
-	    .SHIFTEN(la_oenb[5:4]),
-	    .RST(wb_rst_i), 
-	    .Y(la_data_out[80:49]));
-   r8_mb8 r8_mb8_0(
-   
-//		`ifdef USE_POWER_PINS
-//		.vccd1(vccd1),	// User area 1 1.8V power
-//		.vssd1(vssd1),	// User area 1 digital ground
-//		`endif
-	    .mx(la_data_in[119:112]),
-	    .my(la_data_in[127:120]),
-	    .CLK(wb_clk_i), 
-	    .RST(wb_rst_i),
-	    .product_final(la_data_out[96:81]));
-
-
-
-
-
-endmodule	// user_project_wrapper
-
-
-/*
-
-(* blackbox *)
-
-module FFPMAC(A, B, C, rnd, clk, rst,  result);
-//Parameters
-`ifdef USE_POWER_PINS
-    inout vccd1,        // User area 1 1.8V supply
-    inout vssd1,        // User area 1 digital ground
-`endif
-  parameter WIDTH_16 = 16;
-  parameter WIDTH_32 = 32;
- 
-  //I/O decalarations
-  input [WIDTH_16-1:0] A,B;
-  input [WIDTH_32-1:0] C;
-  input [1:0] rnd;
-  input clk, rst;
-  output [WIDTH_32-1:0] result;
- 
-  endmodule
-
-module CLA_16 ( OPA, OPB, CIN, PHI, SUM_FINAL, COUT_FINAL, CLK );
-
-  parameter N_16 = 16;
-  `ifdef USE_POWER_PINS
-    inout vccd1,        // User area 1 1.8V supply
-    inout vssd1,        // User area 1 digital ground
-  `endif
-  input  [N_16-1:0] OPA;
-  input  [N_16-1:0] OPB;
-  input  CIN;
-  input  PHI;
-  input  CLK;
-  output [N_16-1:0] SUM_FINAL;
-  output COUT_FINAL;
-
-  endmodule
-
-  
-module sa_2D( AA, BB, CLK,SHIFTEN ,RST, Y);
-
-  parameter HPE=2;  // step 1 horizontal processing elements
-  parameter VPE=2;  // vertical processing elements
-
-  parameter WIDTH_4=4;   // step 2 operands width  
-  `ifdef USE_POWER_PINS
-    inout vccd1,        // User area 1 1.8V supply
-    inout vssd1,        // User area 1 digital ground
-  `endif
-  input   [WIDTH_4*HPE-1:0]  AA;
-  input   [WIDTH_4*HPE-1:0]  BB;
-  input           CLK;
-  input           RST;
-  input   [1:0]      SHIFTEN;
-  output   [(2*WIDTH_4*HPE*VPE)-1:0]  Y;
-
-  endmodule
-
-
-module r8_mb8(mx,my,CLK,RST,product_final);
-  parameter WIDTH_8 = 8;
-  `ifdef USE_POWER_PINS
-    inout vccd1,        // User area 1 1.8V supply
-    inout vssd1,        // User area 1 digital ground
-  `endif
-  //IO Start
-  input wire [WIDTH_8-1:0] mx;
-  input wire [WIDTH_8-1:0] my;
-  input wire CLK;
-  input wire RST;
-  output reg [(WIDTH_8*2)-1:0] product_final;
-
-  endmodule
-
-
-module clock_divider(clk,clock_out);
-	`ifdef USE_POWER_PINS
-//    inout vccd1,        // User area 1 1.8V supply
-//    inout vssd1,        // User area 1 digital ground
-	`endif
-    //IO Start
-	input clk;
-	input clock_out;
+ CLA_16 cla16_0 (.CIN(la_oenb[2]),
+    .CLK(wb_clk_i),
+    .COUT_FINAL(la_data_out[48]),
+    .PHI(la_oenb[3]),
+    .VGND(vssd1),
+    .VPWR(vccd1),
+    .OPA({la_data_in[79],
+    la_data_in[78],
+    la_data_in[77],
+    la_data_in[76],
+    la_data_in[75],
+    la_data_in[74],
+    la_data_in[73],
+    la_data_in[72],
+    la_data_in[71],
+    la_data_in[70],
+    la_data_in[69],
+    la_data_in[68],
+    la_data_in[67],
+    la_data_in[66],
+    la_data_in[65],
+    la_data_in[64]}),
+    .OPB({la_data_in[95],
+    la_data_in[94],
+    la_data_in[93],
+    la_data_in[92],
+    la_data_in[91],
+    la_data_in[90],
+    la_data_in[89],
+    la_data_in[88],
+    la_data_in[87],
+    la_data_in[86],
+    la_data_in[85],
+    la_data_in[84],
+    la_data_in[83],
+    la_data_in[82],
+    la_data_in[81],
+    la_data_in[80]}),
+    .SUM_FINAL({la_data_out[47],
+    la_data_out[46],
+    la_data_out[45],
+    la_data_out[44],
+    la_data_out[43],
+    la_data_out[42],
+    la_data_out[41],
+    la_data_out[40],
+    la_data_out[39],
+    la_data_out[38],
+    la_data_out[37],
+    la_data_out[36],
+    la_data_out[35],
+    la_data_out[34],
+    la_data_out[33],
+    la_data_out[32]}));
+ FFPMAC ffpmac_0 (.VGND(vssd1),
+    .VPWR(vccd1),
+    .clk(user_clock2),
+    .rst(wb_rst_i),
+    .A({la_data_in[15],
+    la_data_in[14],
+    la_data_in[13],
+    la_data_in[12],
+    la_data_in[11],
+    la_data_in[10],
+    la_data_in[9],
+    la_data_in[8],
+    la_data_in[7],
+    la_data_in[6],
+    la_data_in[5],
+    la_data_in[4],
+    la_data_in[3],
+    la_data_in[2],
+    la_data_in[1],
+    la_data_in[0]}),
+    .B({la_data_in[31],
+    la_data_in[30],
+    la_data_in[29],
+    la_data_in[28],
+    la_data_in[27],
+    la_data_in[26],
+    la_data_in[25],
+    la_data_in[24],
+    la_data_in[23],
+    la_data_in[22],
+    la_data_in[21],
+    la_data_in[20],
+    la_data_in[19],
+    la_data_in[18],
+    la_data_in[17],
+    la_data_in[16]}),
+    .C({la_data_in[63],
+    la_data_in[62],
+    la_data_in[61],
+    la_data_in[60],
+    la_data_in[59],
+    la_data_in[58],
+    la_data_in[57],
+    la_data_in[56],
+    la_data_in[55],
+    la_data_in[54],
+    la_data_in[53],
+    la_data_in[52],
+    la_data_in[51],
+    la_data_in[50],
+    la_data_in[49],
+    la_data_in[48],
+    la_data_in[47],
+    la_data_in[46],
+    la_data_in[45],
+    la_data_in[44],
+    la_data_in[43],
+    la_data_in[42],
+    la_data_in[41],
+    la_data_in[40],
+    la_data_in[39],
+    la_data_in[38],
+    la_data_in[37],
+    la_data_in[36],
+    la_data_in[35],
+    la_data_in[34],
+    la_data_in[33],
+    la_data_in[32]}),
+    .result({la_data_out[31],
+    la_data_out[30],
+    la_data_out[29],
+    la_data_out[28],
+    la_data_out[27],
+    la_data_out[26],
+    la_data_out[25],
+    la_data_out[24],
+    la_data_out[23],
+    la_data_out[22],
+    la_data_out[21],
+    la_data_out[20],
+    la_data_out[19],
+    la_data_out[18],
+    la_data_out[17],
+    la_data_out[16],
+    la_data_out[15],
+    la_data_out[14],
+    la_data_out[13],
+    la_data_out[12],
+    la_data_out[11],
+    la_data_out[10],
+    la_data_out[9],
+    la_data_out[8],
+    la_data_out[7],
+    la_data_out[6],
+    la_data_out[5],
+    la_data_out[4],
+    la_data_out[3],
+    la_data_out[2],
+    la_data_out[1],
+    la_data_out[0]}),
+    .rnd({la_oenb[1],
+    la_oenb[0]}));
+ r8_mb8 r8_mb8_0 (.CLK(wb_clk_i),
+    .RST(wb_rst_i),
+    .VGND(vssd1),
+    .VPWR(vccd1),
+    .mx({la_data_in[119],
+    la_data_in[118],
+    la_data_in[117],
+    la_data_in[116],
+    la_data_in[115],
+    la_data_in[114],
+    la_data_in[113],
+    la_data_in[112]}),
+    .my({la_data_in[127],
+    la_data_in[126],
+    la_data_in[125],
+    la_data_in[124],
+    la_data_in[123],
+    la_data_in[122],
+    la_data_in[121],
+    la_data_in[120]}),
+    .product_final({la_data_out[96],
+    la_data_out[95],
+    la_data_out[94],
+    la_data_out[93],
+    la_data_out[92],
+    la_data_out[91],
+    la_data_out[90],
+    la_data_out[89],
+    la_data_out[88],
+    la_data_out[87],
+    la_data_out[86],
+    la_data_out[85],
+    la_data_out[84],
+    la_data_out[83],
+    la_data_out[82],
+    la_data_out[81]}));
+ sa_2D sa2d_0 (.CLK(wb_clk_i),
+    .RST(wb_rst_i),
+    .VGND(vssd1),
+    .VPWR(vccd1),
+    .AA({la_data_in[103],
+    la_data_in[102],
+    la_data_in[101],
+    la_data_in[100],
+    la_data_in[99],
+    la_data_in[98],
+    la_data_in[97],
+    la_data_in[96]}),
+    .BB({la_data_in[111],
+    la_data_in[110],
+    la_data_in[109],
+    la_data_in[108],
+    la_data_in[107],
+    la_data_in[106],
+    la_data_in[105],
+    la_data_in[104]}),
+    .SHIFTEN({la_oenb[5],
+    la_oenb[4]}),
+    .Y({la_data_out[80],
+    la_data_out[79],
+    la_data_out[78],
+    la_data_out[77],
+    la_data_out[76],
+    la_data_out[75],
+    la_data_out[74],
+    la_data_out[73],
+    la_data_out[72],
+    la_data_out[71],
+    la_data_out[70],
+    la_data_out[69],
+    la_data_out[68],
+    la_data_out[67],
+    la_data_out[66],
+    la_data_out[65],
+    la_data_out[64],
+    la_data_out[63],
+    la_data_out[62],
+    la_data_out[61],
+    la_data_out[60],
+    la_data_out[59],
+    la_data_out[58],
+    la_data_out[57],
+    la_data_out[56],
+    la_data_out[55],
+    la_data_out[54],
+    la_data_out[53],
+    la_data_out[52],
+    la_data_out[51],
+    la_data_out[50],
+    la_data_out[49]}));
 endmodule
-
-*/
-
-`default_nettype wire
